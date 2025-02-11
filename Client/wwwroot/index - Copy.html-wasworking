@@ -48,32 +48,32 @@
     </blockquote>
 
     <div>
-        <button id="listBtn">List</button>
+        <button onclick="list()">List</button>
     </div>
 
     <div class="form-container">
         <h3>Get Person by ID</h3>
         <input type="number" id="getId" placeholder="Enter ID" />
-        <button id="getBtn">Get</button>
+        <button onclick="get()">Get</button>
     </div>
 
     <div class="form-container">
         <h3>Create Person</h3>
         <input type="text" id="createName" placeholder="Enter Name" />
-        <button id="createBtn">Create</button>
+        <button onclick="create()">Create</button>
     </div>
 
     <div class="form-container">
         <h3>Update Person</h3>
         <input type="number" id="updateId" placeholder="Enter ID" />
         <input type="text" id="updateName" placeholder="Enter New Name" />
-        <button id="updateBtn">Update</button>
+        <button onclick="update()">Update</button>
     </div>
 
     <div class="form-container">
         <h3>Delete Person</h3>
         <input type="number" id="deleteId" placeholder="Enter ID" />
-        <button id="deleteBtn">Delete</button>
+        <button onclick="del()">Delete</button>
     </div>
 
     <!-- Scrollable table container -->
@@ -92,25 +92,16 @@
     </div>
 
     <script>
-        // Attach event listeners after DOM loads
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("listBtn").addEventListener("click", list);
-            document.getElementById("getBtn").addEventListener("click", get);
-            document.getElementById("createBtn").addEventListener("click", create);
-            document.getElementById("updateBtn").addEventListener("click", update);
-            document.getElementById("deleteBtn").addEventListener("click", del);
-        });
-
         async function list() {
-            const endpoint = '/data-api/rest/Person';
+            const endpoint = 'http://localhost:5000/rest/Person';
             try {
                 const response = await fetch(endpoint);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.table(data.value);
                 updateTable(data.value);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -121,7 +112,7 @@
             const id = document.getElementById("getId").value;
             if (!id) return alert("Please enter an ID");
 
-            const endpoint = `/data-api/rest/Person/Id/${id}`;
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
             try {
                 const response = await fetch(endpoint);
                 if (!response.ok) {
@@ -141,7 +132,7 @@
             if (!name) return alert("Please enter a name");
 
             const data = { Name: name };
-            const endpoint = `/data-api/rest/Person`;
+            const endpoint = `http://localhost:5000/rest/Person`;
 
             try {
                 const response = await fetch(endpoint, {
@@ -155,7 +146,7 @@
                 }
 
                 alert("Person created successfully!");
-                list();
+                list(); // Refresh the table
             } catch (error) {
                 console.error("Error creating record:", error);
             }
@@ -167,7 +158,7 @@
             if (!id || !name) return alert("Please enter both ID and Name");
 
             const data = { Name: name };
-            const endpoint = `/data-api/rest/Person/Id/${id}`;
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
 
             try {
                 const response = await fetch(endpoint, {
@@ -181,7 +172,7 @@
                 }
 
                 alert(`Person with ID ${id} updated to ${name}`);
-                list();
+                list(); // Refresh the table
             } catch (error) {
                 console.error("Error updating record:", error);
             }
@@ -191,7 +182,7 @@
             const id = document.getElementById("deleteId").value;
             if (!id) return alert("Please enter an ID");
 
-            const endpoint = `/data-api/rest/Person/Id/${id}`;
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
             try {
                 const response = await fetch(endpoint, {
                     method: "DELETE"
@@ -202,7 +193,7 @@
                 }
 
                 alert(`Person with ID ${id} deleted.`);
-                list();
+                list(); // Refresh the table
             } catch (error) {
                 console.error("Error deleting record:", error);
             }
