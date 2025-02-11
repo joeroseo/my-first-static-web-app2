@@ -93,7 +93,11 @@
 
     <script>
         async function list() {
-            const endpoint = 'http://localhost:5000/rest/Person';
+  //          const endpoint = 'http://localhost:5000/rest/Person';
+  const endpoint = '/data-api/rest/Person';
+ // const response = await fetch(endpoint);
+ // const data = await response.json();
+ .. console.table(data.value);
             try {
                 const response = await fetch(endpoint);
 
