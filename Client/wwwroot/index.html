@@ -9,17 +9,210 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="BlazorBasic.styles.css" rel="stylesheet" />
+    <style>
+        /* Styling for the scrollable table */
+        .table-container {
+            width: 100%;
+            max-width: 600px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .form-container {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <h1>Static Web Apps Database Connections</h1>
+    <blockquote>
+        Open the console in the browser developer tools to see the API responses.
+    </blockquote>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+    <div>
+        <button onclick="list()">List</button>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
+
+    <div class="form-container">
+        <h3>Get Person by ID</h3>
+        <input type="number" id="getId" placeholder="Enter ID" />
+        <button onclick="get()">Get</button>
+    </div>
+
+    <div class="form-container">
+        <h3>Create Person</h3>
+        <input type="text" id="createName" placeholder="Enter Name" />
+        <button onclick="create()">Create</button>
+    </div>
+
+    <div class="form-container">
+        <h3>Update Person</h3>
+        <input type="number" id="updateId" placeholder="Enter ID" />
+        <input type="text" id="updateName" placeholder="Enter New Name" />
+        <button onclick="update()">Update</button>
+    </div>
+
+    <div class="form-container">
+        <h3>Delete Person</h3>
+        <input type="number" id="deleteId" placeholder="Enter ID" />
+        <button onclick="del()">Delete</button>
+    </div>
+
+    <!-- Scrollable table container -->
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be inserted here dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function list() {
+            const endpoint = 'http://localhost:5000/rest/Person';
+            try {
+                const response = await fetch(endpoint);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                updateTable(data.value);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        async function get() {
+            const id = document.getElementById("getId").value;
+            if (!id) return alert("Please enter an ID");
+
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.table(result.value);
+                alert(`Found: ${JSON.stringify(result.value)}`);
+            } catch (error) {
+                console.error("Error fetching record:", error);
+            }
+        }
+
+        async function create() {
+            const name = document.getElementById("createName").value;
+            if (!name) return alert("Please enter a name");
+
+            const data = { Name: name };
+            const endpoint = `http://localhost:5000/rest/Person`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                alert("Person created successfully!");
+                list(); // Refresh the table
+            } catch (error) {
+                console.error("Error creating record:", error);
+            }
+        }
+
+        async function update() {
+            const id = document.getElementById("updateId").value;
+            const name = document.getElementById("updateName").value;
+            if (!id || !name) return alert("Please enter both ID and Name");
+
+            const data = { Name: name };
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                alert(`Person with ID ${id} updated to ${name}`);
+                list(); // Refresh the table
+            } catch (error) {
+                console.error("Error updating record:", error);
+            }
+        }
+
+        async function del() {
+            const id = document.getElementById("deleteId").value;
+            if (!id) return alert("Please enter an ID");
+
+            const endpoint = `http://localhost:5000/rest/Person/Id/${id}`;
+            try {
+                const response = await fetch(endpoint, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to delete record. Status: ${response.status}`);
+                }
+
+                alert(`Person with ID ${id} deleted.`);
+                list(); // Refresh the table
+            } catch (error) {
+                console.error("Error deleting record:", error);
+            }
+        }
+
+        function updateTable(data) {
+            const tableBody = document.querySelector("#dataTable tbody");
+            tableBody.innerHTML = ""; // Clear previous table data
+
+            data.forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.Id}</td>
+                    <td>${item.Name}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
 </body>
 
 </html>
